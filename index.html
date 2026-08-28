@@ -1,0 +1,447 @@
+<title>Portal Producción Técnicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #f2f5f9;
+    --surface: #ffffff;
+    --surface-raised: #eaf0f7;
+    --border: #d7e0ec;
+    --text: #0f1c30;
+    --text-muted: #56677f;
+    --brand-blue: #003f86;
+    --brand-blue-strong: #002a5c;
+    --accent: #f47c02;
+    --accent-strong: #d96c00;
+    --accent-on-accent: #201000;
+    --good: #1f8a5c;
+    --good-bg: #1f8a5c1a;
+    --warning: #b08900;
+    --warning-bg: #b089001a;
+    --critical: #c23b2c;
+    --critical-bg: #c23b2c1a;
+    --shadow: 0 1px 2px rgba(15, 28, 48, 0.06), 0 8px 24px rgba(15, 28, 48, 0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #081221; --surface: #0f1f36; --surface-raised: #142a47; --border: #223a5c;
+      --text: #eaf1fb; --text-muted: #93a7c4; --brand-blue: #4f8fdb; --brand-blue-strong: #79aeed;
+      --accent: #ff9a3d; --accent-strong: #ffb266; --accent-on-accent: #241100;
+      --good: #4fbf8b; --good-bg: #4fbf8b1f; --warning: #e0b830; --warning-bg: #e0b8301f;
+      --critical: #e2665a; --critical-bg: #e2665a1f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #081221; --surface: #0f1f36; --surface-raised: #142a47; --border: #223a5c;
+    --text: #eaf1fb; --text-muted: #93a7c4; --brand-blue: #4f8fdb; --brand-blue-strong: #79aeed;
+    --accent: #ff9a3d; --accent-strong: #ffb266; --accent-on-accent: #241100;
+    --good: #4fbf8b; --good-bg: #4fbf8b1f; --warning: #e0b830; --warning-bg: #e0b8301f;
+    --critical: #e2665a; --critical-bg: #e2665a1f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--ground); color: var(--text);
+    font-family: "Archivo", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1100px; margin: 0 auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+  @media (min-width: 640px) { .page { padding: 2rem 1.5rem; gap: 1.5rem; } }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 0.75rem; }
+  .brand-logo {
+    background: #ffffff; border-radius: 8px; padding: 0.4rem 0.7rem; display: flex;
+    align-items: center; box-shadow: var(--shadow); flex-shrink: 0;
+  }
+  .brand-logo-mark {
+    font-family: "Archivo", system-ui, sans-serif; font-weight: 700; font-size: 0.95rem;
+    letter-spacing: 0.01em; color: #003f86;
+  }
+  .brand-logo-mark span { color: #f47c02; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+  .brand-name { font-weight: 700; font-size: 1rem; }
+  .brand-sub { font-size: 0.75rem; color: var(--text-muted); }
+  .status-chip {
+    font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.7rem; border-radius: 999px;
+    background: var(--surface-raised); border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap;
+  }
+  .status-chip.online { color: var(--good); border-color: var(--good-bg); background: var(--good-bg); }
+  .status-chip.offline { color: var(--critical); border-color: var(--critical-bg); background: var(--critical-bg); }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; box-shadow: var(--shadow); }
+  @media (min-width: 640px) { .panel { padding: 1.75rem; } }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin: 0 0 0.4rem;
+  }
+  h1 { margin: 0 0 0.35rem; font-size: 1.5rem; font-weight: 700; text-wrap: balance; letter-spacing: -0.01em; color: var(--brand-blue); }
+  .lead { margin: 0 0 1.1rem; color: var(--text-muted); max-width: 60ch; }
+
+  .login-panel { max-width: 460px; margin: 0 auto; width: 100%; }
+  #loginForm { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  #rutInput {
+    flex: 1 1 140px; min-width: 0; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 1.3rem;
+    letter-spacing: 0.35em; text-align: center; padding: 0.7rem 0.5rem; border-radius: 10px;
+    border: 1.5px solid var(--border); background: var(--surface-raised); color: var(--text);
+  }
+  #rutInput::placeholder { color: var(--text-muted); opacity: 0.5; letter-spacing: 0.35em; }
+  #rutInput:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
+
+  button {
+    font-family: inherit; background: var(--accent); color: var(--accent-on-accent); border: none;
+    padding: 0.7rem 1.3rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; min-height: 44px;
+  }
+  button:hover:not(:disabled) { background: var(--accent-strong); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .ghost-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .ghost-btn:hover:not(:disabled) { background: var(--surface-raised); color: var(--text); }
+
+  .error { color: var(--critical); font-weight: 600; font-size: 0.875rem; min-height: 1.2em; margin: 0.75rem 0 0; }
+
+  .pick-list { margin-top: 1rem; }
+  .pick-list p { margin: 0 0 0.6rem; color: var(--text-muted); font-size: 0.9rem; }
+  .pick-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
+  .pick-buttons button { background: var(--surface-raised); color: var(--text); border: 1px solid var(--border); text-align: left; }
+  .pick-buttons button:hover { border-color: var(--accent); color: var(--accent); }
+
+  .section-eyebrow { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .section-eyebrow:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .rut-line { margin: 0; font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--text-muted); font-size: 0.9rem; }
+  .model-pill {
+    display: inline-block; margin-top: 0.35rem; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.55rem;
+    border-radius: 999px; background: var(--surface-raised); color: var(--brand-blue); border: 1px solid var(--border);
+  }
+
+  .kpi-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.75rem; }
+  @media (min-width: 560px) { .kpi-strip { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; position: relative; }
+  .kpi-label { font-size: 0.75rem; color: var(--text-muted); }
+  .kpi-value { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: -0.2rem; font-variant-numeric: tabular-nums; }
+
+  .chip { align-self: flex-start; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; }
+  .chip.good { color: var(--good); background: var(--good-bg); }
+  .chip.warning { color: var(--warning); background: var(--warning-bg); }
+  .chip.critical { color: var(--critical); background: var(--critical-bg); }
+  .chip.neutral { color: var(--text-muted); background: var(--surface-raised); }
+  .chip:empty { display: none; }
+
+  .insight-card {
+    background: var(--surface-raised); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 0.8rem 1rem; margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .insight-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .insight-body { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .insight-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+  .insight-count { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--text-muted); }
+
+  .foot-note { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; padding: 0.5rem 0.25rem 1rem; font-size: 0.75rem; color: var(--text-muted); }
+
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
+</style>
+
+<div class="page">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo"><span class="brand-logo-mark">elecnor<span>.</span></span></span>
+      <div class="brand-text">
+        <span class="brand-name">Portal Producción Técnicos</span>
+        <span class="brand-sub">Producción · Avería de Infancia · Repetida Reparada · Quiebres</span>
+      </div>
+    </div>
+    <span id="status" class="status-chip">Comprobando conexión…</span>
+  </header>
+
+  <section class="panel login-panel" id="loginCard">
+    <p class="eyebrow">Sesión</p>
+    <h1>Ingresá con tu RUT</h1>
+    <p class="lead">Escribí los últimos 6 dígitos de tu RUT (sin puntos ni guión). Si tu dígito verificador es K, reemplazalo por 0.</p>
+    <form id="loginForm" autocomplete="off">
+      <input id="rutInput" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="000000" aria-label="Últimos 6 dígitos del RUT" required>
+      <button type="submit">Ingresar</button>
+    </form>
+    <p id="loginError" class="error" role="alert"></p>
+    <div id="pickList" class="pick-list hidden">
+      <p>Hay más de un técnico con ese RUT. Elegí tu nombre:</p>
+      <div id="pickButtons" class="pick-buttons"></div>
+    </div>
+  </section>
+
+  <section class="panel dashboard hidden" id="dashboard">
+    <div class="dash-header">
+      <div>
+        <p class="eyebrow">Técnico</p>
+        <h1 id="dashName">—</h1>
+        <p class="rut-line" id="dashRut">—</p>
+        <span class="model-pill" id="dashModelo">—</span>
+      </div>
+      <button id="logoutBtn" class="ghost-btn">Cerrar sesión</button>
+    </div>
+
+    <p class="eyebrow section-eyebrow">Producción</p>
+    <div class="kpi-strip">
+      <div class="kpi">
+        <span class="kpi-label">Puntos de producción</span>
+        <span class="kpi-value" id="kpiProd">0</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Mínimo exigido</span>
+        <span class="kpi-value" id="kpiProdMin">0</span>
+        <span class="kpi-meta">Según modelo de contrato</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Estado vs. mínimo</span>
+        <span class="kpi-value" id="kpiProdEstado">—</span>
+        <span class="chip" id="kpiProdChip"></span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Bono producción</span>
+        <span class="kpi-value" id="kpiBonoProd">$0</span>
+      </div>
+    </div>
+
+    <p class="eyebrow section-eyebrow">Avería de Infancia (AI)</p>
+    <div class="kpi-strip">
+      <div class="kpi">
+        <span class="kpi-label">Tasa AI</span>
+        <span class="kpi-value" id="kpiAI">—</span>
+        <span class="kpi-meta" id="kpiAIMeta">Meta —</span>
+        <span class="chip" id="kpiAIChip"></span>
+      </div>
+    </div>
+
+    <p class="eyebrow section-eyebrow">Repetida Reparada (RR)</p>
+    <div class="kpi-strip">
+      <div class="kpi">
+        <span class="kpi-label">Tasa RR</span>
+        <span class="kpi-value" id="kpiRR">—</span>
+        <span class="kpi-meta" id="kpiRRMeta">Meta —</span>
+        <span class="chip" id="kpiRRChip"></span>
+      </div>
+    </div>
+
+    <p class="eyebrow section-eyebrow">Quiebres Técnicos</p>
+    <div class="kpi-strip">
+      <div class="kpi">
+        <span class="kpi-label">Tasa Quiebres</span>
+        <span class="kpi-value" id="kpiQ">—</span>
+        <span class="kpi-meta" id="kpiQMeta">Meta —</span>
+        <span class="chip" id="kpiQChip"></span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot-note">
+    <span>Fuente: Cálculo Bono de Producción · Agosto 2026 (Modelo CUFH2)</span>
+    <span id="tecCount"></span>
+  </footer>
+</div>
+
+<script>
+// --- Estado online (visual, no depende de datos: todo está embebido en la página) ---
+const statusEl = document.getElementById('status');
+function updateOnlineStatus() {
+  if (navigator.onLine) {
+    statusEl.textContent = 'En línea';
+    statusEl.className = 'status-chip online';
+  } else {
+    statusEl.textContent = 'Sin conexión — datos igual disponibles';
+    statusEl.className = 'status-chip offline';
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// --- Datos de técnicos: Rut, Nombre, Modelo, Producción (pts), AI, RR, Quiebre (fracción), Bono Producción ($) ---
+// Extraído de "Base" y "Excepcion" del archivo Calculo Bono de Producción_Ago-2026_Modelo CUFH2.xlsx
+const TECNICOS = [
+  {r:"15445679-1",n:"IVAN ALEJANDRO CALDERON MUNOZ",m:"BUCLE",p:218,ai:0.0357,rr:0.025,q:0.008,b:484000},
+  {r:"15957153-k",n:"CRISTIAN ANDRES VASQUEZ MUNOZ",m:"CUFH2",p:217.41,ai:0.0109,rr:0,q:0,b:610798.5},
+  {r:"26758689-6",n:"DANIEL ALEXANDER RAMIREZ TORRES",m:"CUFH2",p:182.8,ai:0.01,rr:0.037,q:0.042,b:408330},
+  {r:"10466681-7",n:"WILFRED RENE ROCCO ZUNIGA",m:"CUFH2",p:166.32,ai:0.0476,rr:0.0385,q:0.0544,b:275931},
+  {r:"15714377-8",n:"BENJAMIN ALFREDO MIRANDA IRARRAZABAL",m:"CUFH2",p:48.76,ai:0,rr:0,q:0.0476,b:0},
+  {r:"20175491-7",n:"CHRISTOPHER PATRICK LISBOA BARRERA",m:"CUFH2",p:139.19,ai:0,rr:0,q:0.0647,b:122569.2},
+  {r:"17805227-6",n:"ESTEBAN DAVID ORTIZ FIGUEROA",m:"CUFH2",p:221.38,ai:0.0222,rr:0,q:0.0244,b:634023},
+  {r:"17769689-7",n:"SIMON ANDRES SILVA PHILIP",m:"CUFH2",p:198.42,ai:0,rr:0.0286,q:0.0169,b:499707},
+  {r:"18829522-3",n:"JAIR JESUS VALENCIA DIAZ",m:"CUFH2",p:156.25,ai:0.0106,rr:0.05,q:0.0155,b:223818.75},
+  {r:"12637747-9",n:"HECTOR LEONARDO MUNOZ MIRANDA",m:"CUFH2",p:191.49,ai:0,rr:0.0286,q:0.0667,b:459166.5},
+  {r:"26266054-0",n:"LUIS ALFONSO VALLEJO GARCIA",m:"CUFH2",p:160.98,ai:0,rr:0,q:0.0811,b:248296.5},
+  {r:"16033846-6",n:"ALEJANDRO SEBASTIAN CISTERNAS MARIN",m:"CUFH2",p:154.75,ai:0,rr:0.027,q:0.0133,b:216056.25},
+  {r:"13426625-2",n:"FERNANDO ALEXIS HOLM MORALES",m:"CUFH2",p:156.85,ai:0.0566,rr:0,q:0.0476,b:226923.75},
+  {r:"19016218-4",n:"BASTIAN IGNACIO RIOS MADRID",m:"CUFH2",p:144.13,ai:0.0217,rr:0.0192,q:0.0787,b:161097.75},
+  {r:"15660308-2",n:"GONZALO ANDRES TAPIA VASCONCELO",m:"CUFH2",p:158.52,ai:0,rr:0,q:0.0325,b:235566},
+  {r:"13428454-4",n:"HENRY MURIEL DIAZ TORRIJO",m:"CUFH2",p:135.9,ai:0.0517,rr:0.0357,q:0.0379,b:107172},
+  {r:"12056884-1",n:"ALEJANDRO ENRIQUE LAGOS GONZALEZ",m:"CUFH2",p:178.44,ai:0.0111,rr:0.05,q:0.0567,b:382824},
+  {r:"11620226-3",n:"ABELARDO HIPOLITO VENEGAS HERNANDEZ",m:"CUFH2",p:177.39,ai:0.0286,rr:0.0513,q:0.0135,b:376681.5},
+  {r:"15764873-K",n:"FABIAN GONZALO SAAVEDRA VILCHES",m:"CUFH2",p:15.83,ai:null,rr:null,q:0,b:0},
+  {r:"17476343-7",n:"FRANCISCO ESTEBAN CARMONA CASTRO",m:"CUFH2",p:37.5,ai:null,rr:null,q:0.0238,b:0},
+  {r:"9998160-1",n:"NESTOR FABIAN PASTEN ALARCON",m:"CUFH2",p:141.19,ai:0.0625,rr:0,q:0.0339,b:131929.2},
+  {r:"16034875-5",n:"JORGE EDUARDO JORQUERA FLORES",m:"CUFH2",p:150.88,ai:0,rr:0,q:0.0087,b:196029},
+  {r:"13650694-3",n:"JORGE RENE RAMIREZ DE LA BARRA",m:"CUFH2",p:102.59,ai:0,rr:0,q:0.0337,b:0},
+  {r:"10792174-5",n:"JOSE GERARDO CORNEJO GARRIDO",m:"CUFH2",p:183.52,ai:0,rr:0.0222,q:0.0082,b:412542},
+  {r:"9338001-0",n:"JOSE MANUEL SEPULVEDA ROJAS",m:"CUFH2",p:135.83,ai:0.0149,rr:0.0465,q:0.0355,b:106844.4},
+  {r:"26658025-8",n:"JUAN JOSE MARCANO GONZALEZ",m:"CUFH2",p:135.82,ai:0.0323,rr:0,q:0.0444,b:106797.6},
+  {r:"21454208-0",n:"FRANCO JOSUE DIAZ NUNEZ",m:"CUFH2",p:112.18,ai:0,rr:0.2581,q:0.0547,b:0},
+  {r:"19325742-9",n:"JUAN ESTEBAN MARTINEZ LOCK",m:"CUFH2",p:161.66,ai:0,rr:0.0213,q:0.048,b:251815.5},
+  {r:"17144358-K",n:"JUAN HERIBERTO VARGAS ALARCON",m:"CUFH2",p:162.03,ai:0,rr:0,q:0.0423,b:253730.25},
+  {r:"12221336-6",n:"MARCO MANUEL VEGA VEGA",m:"CUFH2",p:131.65,ai:0.0635,rr:0.0714,q:0.0593,b:87282},
+  {r:"10387787-3",n:"HECTOR FERNANDO QUIROZ TORRES",m:"CUFH2",p:69.29,ai:0.0164,rr:0.125,q:0.0845,b:0},
+  {r:"17165085-2",n:"MANUEL DARIO JELDES ARANCIBIA",m:"CUFH2",p:145.64,ai:0,rr:0.0185,q:0.062,b:168912},
+  {r:"14472203-5",n:"JONATHAN RICARDO HENRIQUEZ VENEGAS",m:"CUFH2",p:114.52,ai:0.0149,rr:0.0667,q:0.0379,b:7113.6},
+  {r:"20521993-5",n:"MATIAS RODRIGO MONTECINOS POZO",m:"CUFH2",p:194.13,ai:0,rr:0.1071,q:0.0342,b:474610.5},
+  {r:"18706092-3",n:"MATIAS RUBEN RUBINA BURGOS",m:"CUFH2",p:12,ai:null,rr:null,q:null,b:0},
+  {r:"26972231-2",n:"HECTOR JOSE ORTIZ MARQUEZ",m:"CUFH2",p:110.97,ai:0,rr:0.0278,q:0.0593,b:0},
+  {r:"18915265-5",n:"OSCAR ANDRES JOFRE LE CERF",m:"CUFH2",p:211.48,ai:0,rr:0,q:0.0268,b:576108},
+  {r:"25671905-3",n:"PROPHETE GABRIEL",m:"CUFH2",p:169.93,ai:0,rr:0,q:0.0484,b:294612.75},
+  {r:"18380853-2",n:"JOSE LUIS MUNOZ RAMOS",m:"BUCLE",p:17.45,ai:null,rr:null,q:0,b:0},
+  {r:"11826964-0",n:"RICHARDS ANTONIO CRUZ CUEVAS",m:"CUFH2",p:92.29,ai:0.027,rr:0.1538,q:0.0755,b:0},
+  {r:"21597345-K",n:"JOSUE ORELLANA ALARCON",m:"CUFH2",p:1,ai:null,rr:null,q:null,b:0},
+  {r:"12104020-4",n:"YUSSEF ALI SAT PINO",m:"CUFH2",p:108.69,ai:0.0299,rr:0.0333,q:0.0636,b:0},
+  {r:"17160888-0",n:"ALEJANDRO NICOLAS PARA GOMEZ",m:"CUFH2",p:192.83,ai:0,rr:0.0278,q:0.0274,b:493447.5},
+  {r:"9424247-9",n:"AUGUSTO ANDRES FUENTES TAPIA",m:"CUFH2",p:47.53,ai:0.0566,rr:0.1053,q:0.0652,b:0},
+  {r:"21504558-7",n:"CARLOS HERNAN MUNOZ MATUS",m:"CUFH2",p:178.89,ai:0.027,rr:0.0156,q:0.0723,b:411898.5},
+  {r:"11400843-5",n:"FRANCISCO ERNESTO GUERRA GOMEZ",m:"CUFH",p:158.66,ai:null,rr:null,q:0.0211,b:438490},
+  {r:"16230919-6",n:"HECTOR DAVID AVALOS RUPCICH",m:"CUFH",p:112.22,ai:0.0455,rr:0,q:0.031,b:109304},
+  {r:"16403671-5",n:"MAURICIO RODOLFO ASTORGA HERRERA",m:"CUFH2",p:66.09,ai:0,rr:0.0638,q:0.0469,b:40740},
+  {r:"17478977-0",n:"PATRICIO CANALES GEVE",m:"CUFH2",p:187.13,ai:0,rr:0,q:0.0057,b:486544.5},
+  {r:"17473940-4",n:"PATRICIO EDUARDO DELANO SCHWAIGER",m:"CUFH2",p:131.91,ai:0,rr:0.0182,q:0.0288,b:261596.25},
+  {r:"16523139-2",n:"PEDRO ISAIAS CONCHA JORQUERA",m:"CUFH2",p:149.08,ai:0,rr:0.0204,q:0.0093,b:256887},
+  {r:"13637135-5",n:"SANTIAGO EMILIO ANGEL ARIAS",m:"CUFH2",p:108.19,ai:0,rr:0.0385,q:0.0825,b:162236.25},
+  {r:"19469218-8",n:"MATIAS HERNAN VILLALOBOS RAMOS",m:"CUFH2",p:198.9,ai:0,rr:0,q:0.0234,b:528957},
+  {r:"19772487-0",n:"CRISTIAN NICOLAS SERRANO VELLAGAS",m:"CUFH2",p:163.24,ai:0.0517,rr:0.0645,q:0.0068,b:526020},
+  {r:"18741232-3",n:"SEBASTIAN ANDRES SANCHEZ CAYUQUEO",m:"CUFH2",p:198.9,ai:0,rr:0,q:0.0234,b:761540}
+];
+
+// Metas por modelo de contrato (tomadas de la hoja "Metas" del archivo fuente)
+const METAS_MODELO = {
+  CUFH2: { ai: 0.02,  rr: 0.05, q: 0.06,  prodMin: 114 },
+  CUFH:  { ai: 0.02,  rr: 0.05, q: 0.06,  prodMin: 96  },
+  BUCLE: { ai: 0.022, rr: 0.08, q: null,  prodMin: 131 }
+};
+
+document.getElementById('tecCount').textContent = TECNICOS.length + ' técnicos habilitados';
+
+// Código de acceso: últimos 6 caracteres del RUT (sin guión), con el dígito
+// verificador "K" normalizado a "0". Idéntica convención al Portal de Averías.
+function rutLoginCode(rut) {
+  const clean = (rut || '').replace('-', '').replace(/[Kk]$/, '0');
+  return clean.slice(-6);
+}
+
+function getTecnicos(code) {
+  return TECNICOS.filter((t) => rutLoginCode(t.r) === code);
+}
+
+function loginAs(tec) {
+  try { sessionStorage.setItem('tecnico_rut', tec.r); } catch (err) {}
+  showDashboard(tec);
+}
+
+function pctFmt(v) {
+  return v === null || v === undefined ? '—' : (v * 100).toFixed(2).replace('.', ',') + '%';
+}
+
+function metaChip(pct, meta) {
+  if (pct === null || pct === undefined) return { cls: 'neutral', label: 'Sin datos' };
+  if (meta === null || meta === undefined) return { cls: 'neutral', label: 'No aplica' };
+  if (pct <= meta) return { cls: 'good', label: 'Cumple meta' };
+  if (pct <= meta * 2) return { cls: 'warning', label: 'Sobre meta' };
+  return { cls: 'critical', label: 'Sobre meta' };
+}
+
+function setIndicador(prefix, pct, meta) {
+  document.getElementById('kpi' + prefix).textContent = pctFmt(pct);
+  document.getElementById('kpi' + prefix + 'Meta').textContent = meta === null || meta === undefined ? 'No aplica para este modelo' : 'Meta ' + (meta * 100).toFixed(1).replace('.', ',') + '%';
+  const chip = metaChip(pct, meta);
+  const chipEl = document.getElementById('kpi' + prefix + 'Chip');
+  chipEl.textContent = chip.label;
+  chipEl.className = 'chip ' + chip.cls;
+}
+
+const moneyFmt = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+
+function showDashboard(tec) {
+  document.getElementById('loginCard').classList.add('hidden');
+  document.getElementById('pickList').classList.add('hidden');
+  const dash = document.getElementById('dashboard');
+  dash.classList.remove('hidden');
+
+  document.getElementById('dashName').textContent = tec.n;
+  document.getElementById('dashRut').textContent = 'Código ' + rutLoginCode(tec.r);
+  document.getElementById('dashModelo').textContent = 'Modelo ' + tec.m;
+
+  const meta = METAS_MODELO[tec.m] || METAS_MODELO.CUFH2;
+
+  document.getElementById('kpiProd').textContent = tec.p.toFixed(2).replace('.', ',');
+  document.getElementById('kpiProdMin').textContent = meta.prodMin;
+  const cumpleProd = tec.p >= meta.prodMin;
+  document.getElementById('kpiProdEstado').textContent = cumpleProd ? 'Cumple' : 'Bajo mínimo';
+  const prodChip = document.getElementById('kpiProdChip');
+  prodChip.textContent = cumpleProd ? 'Cumple mínimo' : 'Bajo mínimo';
+  prodChip.className = 'chip ' + (cumpleProd ? 'good' : 'critical');
+  document.getElementById('kpiBonoProd').textContent = moneyFmt.format(tec.b || 0);
+
+  setIndicador('AI', tec.ai, meta.ai);
+  setIndicador('RR', tec.rr, meta.rr);
+  setIndicador('Q', tec.q, meta.q);
+}
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = '';
+  document.getElementById('pickList').classList.add('hidden');
+
+  const code = document.getElementById('rutInput').value.trim();
+  if (!/^\d{6}$/.test(code)) {
+    errorEl.textContent = 'Ingresá exactamente 6 dígitos.';
+    return;
+  }
+
+  const matches = getTecnicos(code);
+  if (matches.length === 0) {
+    errorEl.textContent = 'No se encontró ningún técnico con ese código.';
+  } else if (matches.length === 1) {
+    loginAs(matches[0]);
+  } else {
+    const pickList = document.getElementById('pickList');
+    const pickButtons = document.getElementById('pickButtons');
+    pickButtons.innerHTML = '';
+    matches.forEach((m) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = m.n;
+      btn.addEventListener('click', () => loginAs(m));
+      pickButtons.appendChild(btn);
+    });
+    pickList.classList.remove('hidden');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  try { sessionStorage.removeItem('tecnico_rut'); } catch (err) {}
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginCard').classList.remove('hidden');
+  document.getElementById('rutInput').value = '';
+});
+
+// Restaurar sesión si ya había iniciado sesión (sessionStorage sobrevive recargas)
+(function tryRestoreSession() {
+  let rut = null;
+  try { rut = sessionStorage.getItem('tecnico_rut'); } catch (err) { return; }
+  if (!rut) return;
+  const tec = TECNICOS.find((t) => t.r === rut);
+  if (tec) showDashboard(tec);
+})();
+</script>
