@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Kpi's y Producción Técnicos</title>
+<title>Portal Producción Técnicos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -162,7 +162,7 @@
     <div class="brand">
       <span class="brand-logo"><span class="brand-logo-mark">elecnor<span>.</span></span></span>
       <div class="brand-text">
-        <span class="brand-name">Kpi's y Producción Técnicos</span>
+        <span class="brand-name">Portal Producción Técnicos</span>
         <span class="brand-sub">Producción · Avería de Infancia · Repetida Reparada · Quiebres</span>
       </div>
     </div>
@@ -216,71 +216,25 @@
     <p class="eyebrow section-eyebrow">Avería de Infancia (AI)</p>
     <div class="kpi-strip">
       <div class="kpi">
-        <span class="kpi-label">Órdenes asignadas</span>
-        <span class="kpi-value" id="kpiAITotal">—</span>
-      </div>
-      <div class="kpi">
-        <span class="kpi-label">Con avería en infancia</span>
-        <span class="kpi-value" id="kpiAICount">—</span>
-      </div>
-      <div class="kpi">
         <span class="kpi-label">Tasa AI</span>
         <span class="kpi-value" id="kpiAI">—</span>
         <span class="kpi-meta" id="kpiAIMeta">Meta —</span>
         <span class="chip" id="kpiAIChip"></span>
-      </div>
-      <div class="kpi">
-        <span class="kpi-label">Prom. días a la avería</span>
-        <span class="kpi-value" id="kpiAIDias">—</span>
-      </div>
-    </div>
-    <div class="insight-card">
-      <span class="insight-label">Causa más recurrente</span>
-      <div class="insight-body">
-        <span class="insight-value" id="causaAIValue">—</span>
-        <span class="insight-count" id="causaAICount"></span>
       </div>
     </div>
 
     <p class="eyebrow section-eyebrow">Repetida Reparada (RR)</p>
     <div class="kpi-strip">
       <div class="kpi">
-        <span class="kpi-label">Órdenes asignadas</span>
-        <span class="kpi-value" id="kpiRRTotal">—</span>
-      </div>
-      <div class="kpi">
-        <span class="kpi-label">Con avería reiterada</span>
-        <span class="kpi-value" id="kpiRRCount">—</span>
-      </div>
-      <div class="kpi">
         <span class="kpi-label">Tasa RR</span>
         <span class="kpi-value" id="kpiRR">—</span>
         <span class="kpi-meta" id="kpiRRMeta">Meta —</span>
         <span class="chip" id="kpiRRChip"></span>
       </div>
-      <div class="kpi">
-        <span class="kpi-label">Prom. días a la avería</span>
-        <span class="kpi-value" id="kpiRRDias">—</span>
-      </div>
-    </div>
-    <div class="insight-card">
-      <span class="insight-label">Causa más recurrente</span>
-      <div class="insight-body">
-        <span class="insight-value" id="causaRRValue">—</span>
-        <span class="insight-count" id="causaRRCount"></span>
-      </div>
     </div>
 
     <p class="eyebrow section-eyebrow">Quiebres Técnicos</p>
-    <div class="kpi-strip kpi-strip-3">
-      <div class="kpi">
-        <span class="kpi-label">Instalaciones asignadas</span>
-        <span class="kpi-value" id="kpiQTotal">—</span>
-      </div>
-      <div class="kpi">
-        <span class="kpi-label">Quiebres técnicos</span>
-        <span class="kpi-value" id="kpiQCount">—</span>
-      </div>
+    <div class="kpi-strip">
       <div class="kpi">
         <span class="kpi-label">Tasa Quiebres</span>
         <span class="kpi-value" id="kpiQ">—</span>
@@ -288,19 +242,11 @@
         <span class="chip" id="kpiQChip"></span>
       </div>
     </div>
-    <div class="insight-card">
-      <span class="insight-label">Causa más recurrente</span>
-      <div class="insight-body">
-        <span class="insight-value" id="causaQValue">—</span>
-        <span class="insight-count" id="causaQCount"></span>
-      </div>
-    </div>
   </section>
 
   <footer class="foot-note">
     <span>Fuente: Producción Ago-2026 (Modelo CUFH2)</span>
     <span id="tecCount"></span>
-    <span>Diseñado por Xas</span>
   </footer>
 </div>
 
@@ -400,98 +346,7 @@ function getTecnicos(code) {
   return TECNICOS.filter((t) => rutLoginCode(t.r) === code);
 }
 
-// --- Detalle de AI / RR / Quiebres (mismas bases del Portal de Averías, cruzadas por código de RUT) ---
-const COL_INFANCIA = { rut: 'toa_provider_external_id', flag: 'infancia', dias: 'q_dias_infancia', causa: 'rmdy_causa' };
-const COL_REITERADAS = { rut: 'toa_piv_rut_tecnico', flag: 'rdy_prd_tiene_reitero_30d', dias: 'rdy_prd_q_dias_reitero', causa: 'toa_piv_causa' };
-
-const infancia = { header: [], rows: [] };
-const reiteradas = { header: [], rows: [] };
-const quiebres = { header: [], rows: [] };
-let detalleReady = false;
-
-function parseCsvLine(line) {
-  return line.split(';').map((v) => v.replace(/^"|"$/g, '').trim());
-}
-function idxIn(dataset, colName) {
-  return dataset.header.indexOf(colName);
-}
-function loadDataset(dataset, fileName) {
-  return fetch(fileName).then((res) => res.text()).then((text) => {
-    const lines = text.trim().split('\n');
-    dataset.header = parseCsvLine(lines[0]);
-    dataset.rows = lines.slice(1).filter(Boolean).map(parseCsvLine);
-  });
-}
-
-Promise.all([
-  loadDataset(infancia, 'bbdd_averias_infancia.csv'),
-  loadDataset(reiteradas, 'bbdd_averias_reiteradas.csv'),
-  loadDataset(quiebres, 'bbdd_quiebres.csv')
-]).then(() => {
-  detalleReady = true;
-  if (currentTec) showDashboard(currentTec);
-  else tryRestoreSession();
-}).catch(() => { /* el detalle es un complemento; el login por TECNICOS sigue funcionando sin él */ });
-
-function causaMasRecurrente(rows, causaIdx) {
-  if (causaIdx < 0) return null;
-  const counts = new Map();
-  for (const row of rows) {
-    const causa = (row[causaIdx] || '').trim();
-    if (!causa) continue;
-    counts.set(causa, (counts.get(causa) || 0) + 1);
-  }
-  let top = null;
-  for (const [causa, count] of counts) {
-    if (!top || count > top.count) top = { causa, count };
-  }
-  return top;
-}
-
-function computeDetalle(dataset, COL, code) {
-  const rutIdx = idxIn(dataset, COL.rut);
-  const misOrdenes = dataset.rows.filter((row) => rutLoginCode(row[rutIdx]) === code);
-  const conFlag = misOrdenes.filter((row) => row[idxIn(dataset, COL.flag)] === '1');
-  const dias = conFlag
-    .map((row) => parseFloat(row[idxIn(dataset, COL.dias)]))
-    .filter((n) => !isNaN(n));
-  const avgDias = dias.length ? (dias.reduce((a, b) => a + b, 0) / dias.length).toFixed(1) : '—';
-  const causaTop = causaMasRecurrente(conFlag, idxIn(dataset, COL.causa));
-  return { total: misOrdenes.length, count: conFlag.length, avgDias, causaTop };
-}
-
-// Quiebres viene pre-agregado por técnico (una fila por técnico, no por orden).
-function computeQuiebreDetalle(code) {
-  const rutIdx = idxIn(quiebres, 'rut_tecnico');
-  const totalIdx = idxIn(quiebres, 'total_instala');
-  const countIdx = idxIn(quiebres, 'quiebre_tecnico');
-  const causaIdx = idxIn(quiebres, 'causa_recurrente');
-  const causaCountIdx = idxIn(quiebres, 'causa_count');
-  const row = quiebres.rows.find((r) => rutLoginCode(r[rutIdx]) === code);
-  const total = row ? parseInt(row[totalIdx], 10) || 0 : 0;
-  const count = row ? parseInt(row[countIdx], 10) || 0 : 0;
-  const causa = row && row[causaIdx] ? row[causaIdx] : null;
-  const causaCount = row ? parseInt(row[causaCountIdx], 10) || 0 : 0;
-  const causaTop = causa ? { causa, count: causaCount } : null;
-  return { total, count, causaTop };
-}
-
-function fillCausa(prefix, causaTop) {
-  const valueEl = document.getElementById(prefix + 'Value');
-  const countEl = document.getElementById(prefix + 'Count');
-  if (causaTop) {
-    valueEl.textContent = causaTop.causa;
-    countEl.textContent = causaTop.count === 1 ? '1 vez' : causaTop.count + ' veces';
-  } else {
-    valueEl.textContent = 'Sin registros';
-    countEl.textContent = '';
-  }
-}
-
-let currentTec = null;
-
 function loginAs(tec) {
-  currentTec = tec;
   try { sessionStorage.setItem('tecnico_rut', tec.r); } catch (err) {}
   showDashboard(tec);
 }
@@ -537,34 +392,9 @@ function showDashboard(tec) {
   prodChip.textContent = cumpleProd ? 'Cumple mínimo' : 'Bajo mínimo';
   prodChip.className = 'chip ' + (cumpleProd ? 'good' : 'critical');
 
-  const code = rutLoginCode(tec.r);
-
-  if (!detalleReady) {
-    setIndicador('AI', null, meta.ai);
-    setIndicador('RR', null, meta.rr);
-    setIndicador('Q', null, meta.q);
-    return;
-  }
-
-  const detAI = computeDetalle(infancia, COL_INFANCIA, code);
-  document.getElementById('kpiAITotal').textContent = detAI.total;
-  document.getElementById('kpiAICount').textContent = detAI.count;
-  document.getElementById('kpiAIDias').textContent = detAI.avgDias;
-  setIndicador('AI', detAI.total ? detAI.count / detAI.total : 0, meta.ai);
-  fillCausa('causaAI', detAI.causaTop);
-
-  const detRR = computeDetalle(reiteradas, COL_REITERADAS, code);
-  document.getElementById('kpiRRTotal').textContent = detRR.total;
-  document.getElementById('kpiRRCount').textContent = detRR.count;
-  document.getElementById('kpiRRDias').textContent = detRR.avgDias;
-  setIndicador('RR', detRR.total ? detRR.count / detRR.total : 0, meta.rr);
-  fillCausa('causaRR', detRR.causaTop);
-
-  const detQ = computeQuiebreDetalle(code);
-  document.getElementById('kpiQTotal').textContent = detQ.total;
-  document.getElementById('kpiQCount').textContent = detQ.count;
-  setIndicador('Q', detQ.total ? detQ.count / detQ.total : 0, meta.q);
-  fillCausa('causaQ', detQ.causaTop);
+  setIndicador('AI', tec.ai, meta.ai);
+  setIndicador('RR', tec.rr, meta.rr);
+  setIndicador('Q', tec.q, meta.q);
 }
 
 document.getElementById('loginForm').addEventListener('submit', (e) => {
@@ -607,17 +437,13 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 });
 
 // Restaurar sesión si ya había iniciado sesión (sessionStorage sobrevive recargas)
-function tryRestoreSession() {
+(function tryRestoreSession() {
   let rut = null;
   try { rut = sessionStorage.getItem('tecnico_rut'); } catch (err) { return; }
   if (!rut) return;
   const tec = TECNICOS.find((t) => t.r === rut);
-  if (tec) {
-    currentTec = tec;
-    showDashboard(tec);
-  }
-}
-tryRestoreSession();
+  if (tec) showDashboard(tec);
+})();
 </script>
 </body>
 </html>
