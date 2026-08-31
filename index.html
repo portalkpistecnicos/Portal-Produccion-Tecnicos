@@ -328,7 +328,7 @@ const TECNICOS = [
 
 // Metas por modelo de contrato (tomadas de la hoja "Metas" del archivo fuente)
 const METAS_MODELO = {
-  CUFH2: { ai: 0.02,  rr: 0.05, q: 0.06,  prodMin: 114 },
+  CUFH2: { ai: 0.02,  rr: 0.05, q: 0.06,  prodMin: 113 },
   CUFH:  { ai: 0.02,  rr: 0.05, q: 0.06,  prodMin: 96  },
   BUCLE: { ai: 0.022, rr: 0.08, q: null,  prodMin: 131 }
 };
@@ -385,7 +385,7 @@ function showDashboard(tec) {
   const meta = METAS_MODELO[tec.m] || METAS_MODELO.CUFH2;
 
   document.getElementById('kpiProd').textContent = tec.p.toFixed(2).replace('.', ',');
-  document.getElementById('kpiProdMin').textContent = meta.prodMin;
+  document.getElementById('kpiProdMin').textContent = meta.prodMin + ' PB';
   const cumpleProd = tec.p >= meta.prodMin;
   document.getElementById('kpiProdEstado').textContent = cumpleProd ? 'Cumple' : 'Bajo mínimo';
   const prodChip = document.getElementById('kpiProdChip');
