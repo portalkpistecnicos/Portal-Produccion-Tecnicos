@@ -149,6 +149,26 @@
   .insight-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
   .insight-count { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--text-muted); }
 
+  .folios-btn {
+    align-self: flex-start; margin-top: 0.2rem; background: transparent; color: var(--accent); border: none;
+    padding: 0; min-height: 0; font-size: 0.8rem; font-weight: 600; text-decoration: underline;
+    text-underline-offset: 2px; cursor: pointer;
+  }
+  .folios-btn:hover:not(:disabled) { color: var(--accent-strong); background: transparent; }
+  .folios-btn[aria-expanded="true"]::after { content: " ▲"; }
+  .folios-btn[aria-expanded="false"]::after { content: " ▼"; }
+  .folios-list {
+    list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem;
+    max-height: 220px; overflow-y: auto;
+  }
+  .folios-list li {
+    display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0.6rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .folios-list .folio-num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.78rem; color: var(--text); }
+  .folios-list .folio-date { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+  .folios-empty { font-size: 0.8rem; color: var(--text-muted); margin: 0.6rem 0 0; }
+
   .foot-note { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; padding: 0.5rem 0.25rem 1rem; font-size: 0.75rem; color: var(--text-muted); }
 
   .hidden { display: none !important; }
@@ -240,6 +260,8 @@
         <span class="insight-value" id="causaInfanciaValue">—</span>
         <span class="insight-count" id="causaInfanciaCount"></span>
       </div>
+      <button type="button" class="folios-btn hidden" id="foliosInfanciaBtn" aria-expanded="false">Ver actividades (<span id="foliosInfanciaCount">0</span>)</button>
+      <ul class="folios-list hidden" id="foliosInfanciaList"></ul>
     </div>
 
     <p class="eyebrow section-eyebrow">Averías Reiteradas</p>
@@ -269,6 +291,8 @@
         <span class="insight-value" id="causaReiteradasValue">—</span>
         <span class="insight-count" id="causaReiteradasCount"></span>
       </div>
+      <button type="button" class="folios-btn hidden" id="foliosReiteradasBtn" aria-expanded="false">Ver actividades (<span id="foliosReiteradasCount">0</span>)</button>
+      <ul class="folios-list hidden" id="foliosReiteradasList"></ul>
     </div>
 
     <p class="eyebrow section-eyebrow">Quiebres Técnicos</p>
@@ -322,62 +346,62 @@ updateOnlineStatus();
 // --- Datos de técnicos: Rut, Nombre, Modelo, Producción (pts), AI, RR, Quiebre (fracción) ---
 // Extraído de "Base" y "Excepcion" del archivo Calculo Bono de Producción_Ago-2026_Modelo CUFH2.xlsx
 const TECNICOS = [
-  {r:"15445679-1",n:"IVAN ALEJANDRO CALDERON MUNOZ",m:"BUCLE",p:65.05,inf:{total:55,con:1,avgDias:9,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1},rei:{total:62,con:3,avgDias:5.3,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:38,con:0,causa:null,causaCount:0}},
-  {r:"15957153-k",n:"CRISTIAN ANDRES VASQUEZ MUNOZ",m:"CUFH2",p:110.82,inf:{total:101,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:41,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:49,con:0,causa:null,causaCount:0}},
-  {r:"26758689-6",n:"DANIEL ALEXANDER RAMIREZ TORRES",m:"CUFH2",p:76.86,inf:{total:75,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:40,con:3,avgDias:11.3,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:62,con:2,causa:"F14_SIN POTENCIA - FIBRA CORTADA RAISE CORTADO - PROTECTO NUEVO",causaCount:1}},
-  {r:"10466681-7",n:"WILFRED RENE ROCCO ZUNIGA",m:"CUFH2",p:76.93,inf:{total:44,con:2,avgDias:15.5,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1},rei:{total:43,con:4,avgDias:3.3,causa:"BA-PROBLEMA CONEXION",causaCount:2},qui:{total:57,con:2,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
-  {r:"15714377-8",n:"BENJAMIN ALFREDO MIRANDA IRARRAZABAL",m:"CUFH2",p:67.18,inf:{total:41,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:34,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:12,con:0,causa:null,causaCount:0}},
-  {r:"20175491-7",n:"CHRISTOPHER PATRICK LISBOA BARRERA",m:"CUFH2",p:75.57,inf:{total:51,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:51,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:37,con:1,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
-  {r:"17805227-6",n:"ESTEBAN DAVID ORTIZ FIGUEROA",m:"CUFH2",p:98.35,inf:{total:87,con:2,avgDias:16.5,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1},rei:{total:55,con:1,avgDias:2,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:64,con:2,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
-  {r:"17769689-7",n:"SIMON ANDRES SILVA PHILIP",m:"CUFH2",p:65.5,inf:{total:89,con:1,avgDias:15,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1},rei:{total:40,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:42,con:1,causa:"F03_PON CAMBIADO PROYECTO NUEVO",causaCount:1}},
-  {r:"18829522-3",n:"JAIR JESUS VALENCIA DIAZ",m:"CUFH2",p:76.83,inf:{total:76,con:2,avgDias:13.5,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -97918",causaCount:1},rei:{total:44,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:36,con:1,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
-  {r:"12637747-9",n:"HECTOR LEONARDO MUNOZ MIRANDA",m:"CUFH2",p:85.4,inf:{total:83,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:35,con:1,avgDias:3,causa:"BA-PROBLEMA CONEXION",causaCount:1},qui:{total:52,con:2,causa:"Q99_ZONA DE RIESGO",causaCount:1}},
-  {r:"26266054-0",n:"LUIS ALFONSO VALLEJO GARCIA",m:"CUFH2",p:87.36,inf:{total:51,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:51,con:1,avgDias:26,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:59,con:4,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:2}},
-  {r:"16033846-6",n:"ALEJANDRO SEBASTIAN CISTERNAS MARIN",m:"CUFH2",p:82.18,inf:{total:61,con:5,avgDias:18,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:2},rei:{total:50,con:6,avgDias:15.2,causa:"FO SIN POTENCIA",causaCount:3},qui:{total:47,con:0,causa:null,causaCount:0}},
-  {r:"13426625-2",n:"FERNANDO ALEXIS HOLM MORALES",m:"CUFH2",p:70.96,inf:{total:78,con:4,avgDias:14.3,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2},rei:{total:26,con:1,avgDias:1,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:43,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
-  {r:"19016218-4",n:"BASTIAN IGNACIO RIOS MADRID",m:"CUFH2",p:59.85,inf:{total:68,con:3,avgDias:12,causa:"BA-NO NAVEGA - FO - 97918",causaCount:2},rei:{total:47,con:3,avgDias:6.3,causa:"FO SIN POTENCIA",causaCount:3},qui:{total:37,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
-  {r:"15660308-2",n:"GONZALO ANDRES TAPIA VASCONCELO",m:"CUFH2",p:84.62,inf:{total:53,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:75,con:2,avgDias:9,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:38,con:1,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
-  {r:"13428454-4",n:"HENRY MURIEL DIAZ TORRIJO",m:"CUFH2",p:70.1,inf:{total:59,con:3,avgDias:16.7,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:2},rei:{total:44,con:1,avgDias:10,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:44,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
-  {r:"12056884-1",n:"ALEJANDRO ENRIQUE LAGOS GONZALEZ",m:"CUFH2",p:123.22,inf:{total:78,con:1,avgDias:2,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1},rei:{total:38,con:1,avgDias:3,causa:"BA-PROBLEMA CONEXION",causaCount:1},qui:{total:43,con:1,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
-  {r:"11620226-3",n:"ABELARDO HIPOLITO VENEGAS HERNANDEZ",m:"CUFH2",p:85.95,inf:{total:70,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:48,con:3,avgDias:4.7,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:62,con:2,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
-  {r:"15764873-K",n:"FABIAN GONZALO SAAVEDRA VILCHES",m:"CUFH2",p:50.13,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"17476343-7",n:"FRANCISCO ESTEBAN CARMONA CASTRO",m:"CUFH2",p:47.5,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"9998160-1",n:"NESTOR FABIAN PASTEN ALARCON",m:"CUFH2",p:8.2,inf:{total:63,con:2,avgDias:6,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:37,con:4,avgDias:14.5,causa:"FO SIN POTENCIA",causaCount:3},qui:{total:47,con:1,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
-  {r:"16034875-5",n:"JORGE EDUARDO JORQUERA FLORES",m:"CUFH2",p:21.63,inf:{total:101,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:70,con:1,avgDias:21,causa:"BA-PROBLEMA CONEXION",causaCount:1},qui:{total:21,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
-  {r:"13650694-3",n:"JORGE RENE RAMIREZ DE LA BARRA",m:"CUFH2",p:68.69,inf:{total:61,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:48,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:15,con:0,causa:null,causaCount:0}},
-  {r:"10792174-5",n:"JOSE GERARDO CORNEJO GARRIDO",m:"CUFH2",p:73.21,inf:{total:74,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:39,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:37,con:0,causa:null,causaCount:0}},
-  {r:"9338001-0",n:"JOSE MANUEL SEPULVEDA ROJAS",m:"CUFH2",p:67.43,inf:{total:52,con:1,avgDias:21,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:48,con:5,avgDias:11.2,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:52,con:1,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
-  {r:"26658025-8",n:"JUAN JOSE MARCANO GONZALEZ",m:"CUFH2",p:70.26,inf:{total:58,con:1,avgDias:21,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1},rei:{total:36,con:3,avgDias:10.3,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:42,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
-  {r:"21454208-0",n:"FRANCO JOSUE DIAZ NUNEZ",m:"CUFH2",p:49.31,inf:{total:48,con:5,avgDias:11,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2},rei:{total:39,con:5,avgDias:14,causa:"FO SIN POTENCIA",causaCount:4},qui:{total:41,con:4,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:2}},
-  {r:"19325742-9",n:"JUAN ESTEBAN MARTINEZ LOCK",m:"CUFH2",p:73.09,inf:{total:78,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:41,con:1,avgDias:2,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:32,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
-  {r:"17144358-K",n:"JUAN HERIBERTO VARGAS ALARCON",m:"CUFH2",p:81.39,inf:{total:70,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:44,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:28,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
-  {r:"12221336-6",n:"MARCO MANUEL VEGA VEGA",m:"CUFH2",p:65.9,inf:{total:48,con:2,avgDias:7.5,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1},rei:{total:51,con:1,avgDias:6,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:54,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
-  {r:"10387787-3",n:"HECTOR FERNANDO QUIROZ TORRES",m:"CUFH2",p:29.9,inf:{total:51,con:1,avgDias:13,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:36,con:2,avgDias:16,causa:"BA-PROBLEMA CONEXION",causaCount:2},qui:{total:7,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:2}},
-  {r:"17165085-2",n:"MANUEL DARIO JELDES ARANCIBIA",m:"CUFH2",p:86.53,inf:{total:77,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:33,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:36,con:1,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
-  {r:"14472203-5",n:"JONATHAN RICARDO HENRIQUEZ VENEGAS",m:"CUFH2",p:59.63,inf:{total:57,con:3,avgDias:19,causa:"DESPACHO TEC REQUERIDO MI MOVISTAR - FO - 97918",causaCount:1},rei:{total:37,con:1,avgDias:19,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:38,con:0,causa:null,causaCount:0}},
-  {r:"20521993-5",n:"MATIAS RODRIGO MONTECINOS POZO",m:"CUFH2",p:86.73,inf:{total:89,con:1,avgDias:10,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:54,con:1,avgDias:29,causa:"BA-PROBLEMA CONEXION",causaCount:1},qui:{total:42,con:1,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
-  {r:"18706092-3",n:"MATIAS RUBEN RUBINA BURGOS",m:"CUFH2",p:52.8,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"26972231-2",n:"HECTOR JOSE ORTIZ MARQUEZ",m:"CUFH2",p:71.12,inf:{total:44,con:3,avgDias:2.7,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1},rei:{total:34,con:3,avgDias:12,causa:"BA-PROBLEMA MODEM",causaCount:2},qui:{total:36,con:2,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
-  {r:"18915265-5",n:"OSCAR ANDRES JOFRE LE CERF",m:"CUFH2",p:93.81,inf:{total:86,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:57,con:2,avgDias:24,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:35,con:0,causa:null,causaCount:0}},
-  {r:"25671905-3",n:"PROPHETE GABRIEL",m:"CUFH2",p:71.33,inf:{total:90,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:21,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:39,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
-  {r:"18380853-2",n:"JOSE LUIS MUNOZ RAMOS",m:"BUCLE",p:47.8,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"11826964-0",n:"RICHARDS ANTONIO CRUZ CUEVAS",m:"CUFH2",p:44.03,inf:{total:44,con:3,avgDias:12.7,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1},rei:{total:46,con:4,avgDias:5.5,causa:"FO SIN POTENCIA",causaCount:4},qui:{total:38,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:2}},
-  {r:"21597345-K",n:"JOSUE ORELLANA ALARCON",m:"CUFH2",p:46.7,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"12104020-4",n:"YUSSEF ALI SAT PINO",m:"CUFH2",p:67.42,inf:{total:45,con:2,avgDias:15.5,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:44,con:1,avgDias:5,causa:"FO SIN POTENCIA",causaCount:1},qui:{total:34,con:4,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:2}},
-  {r:"17160888-0",n:"ALEJANDRO NICOLAS PARA GOMEZ",m:"CUFH2",p:192.83,inf:{total:77,con:5,avgDias:11.2,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2},rei:{total:50,con:4,avgDias:13.5,causa:"BA-PROBLEMA MODEM",causaCount:2},qui:{total:46,con:0,causa:null,causaCount:0}},
-  {r:"9424247-9",n:"AUGUSTO ANDRES FUENTES TAPIA",m:"CUFH2",p:47.53,inf:{total:59,con:2,avgDias:9.5,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:2},rei:{total:45,con:2,avgDias:7,causa:"BA-PROBLEMA CONEXION",causaCount:1},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"21504558-7",n:"CARLOS HERNAN MUNOZ MATUS",m:"CUFH2",p:178.89,inf:{total:73,con:2,avgDias:19,causa:"BA-NO NAVEGA - FO - 97918",causaCount:2},rei:{total:61,con:3,avgDias:9.7,causa:"BA-PROBLEMA CONEXION",causaCount:2},qui:{total:48,con:6,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:4}},
-  {r:"11400843-5",n:"FRANCISCO ERNESTO GUERRA GOMEZ",m:"CUFH",p:158.66,inf:{total:24,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:54,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:48,con:2,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
-  {r:"16230919-6",n:"HECTOR DAVID AVALOS RUPCICH",m:"CUFH",p:112.22,inf:{total:43,con:1,avgDias:21,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1},rei:{total:62,con:3,avgDias:14,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:35,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:2}},
-  {r:"16403671-5",n:"MAURICIO RODOLFO ASTORGA HERRERA",m:"CUFH2",p:66.09,inf:{total:45,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:68,con:2,avgDias:6,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:0,con:0,causa:null,causaCount:0}},
-  {r:"17478977-0",n:"PATRICIO CANALES GEVE",m:"CUFH2",p:187.13,inf:{total:56,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:50,con:7,avgDias:24.3,causa:"FO SIN POTENCIA",causaCount:4},qui:{total:51,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
-  {r:"17473940-4",n:"PATRICIO EDUARDO DELANO SCHWAIGER",m:"CUFH2",p:131.91,inf:{total:107,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:62,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:8,con:0,causa:null,causaCount:0}},
-  {r:"16523139-2",n:"PEDRO ISAIAS CONCHA JORQUERA",m:"CUFH2",p:149.08,inf:{total:62,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:38,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:41,con:0,causa:null,causaCount:0}},
-  {r:"13637135-5",n:"SANTIAGO EMILIO ANGEL ARIAS",m:"CUFH2",p:108.19,inf:{total:87,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:46,con:3,avgDias:16.7,causa:"FO SIN POTENCIA",causaCount:2},qui:{total:15,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
-  {r:"19469218-8",n:"MATIAS HERNAN VILLALOBOS RAMOS",m:"CUFH2",p:198.9,inf:{total:28,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:20,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:39,con:0,causa:null,causaCount:0}},
-  {r:"19772487-0",n:"CRISTIAN NICOLAS SERRANO VELLAGAS",m:"CUFH2",p:163.24,inf:{total:60,con:3,avgDias:4,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1},rei:{total:88,con:12,avgDias:8,causa:"FO SIN POTENCIA",causaCount:10},qui:{total:25,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
-  {r:"18741232-3",n:"SEBASTIAN ANDRES SANCHEZ CAYUQUEO",m:"CUFH2",p:198.9,inf:{total:102,con:1,avgDias:6,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1},rei:{total:35,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:47,con:1,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
-  {r:"13358326-2",n:"EDISON ANTONIO LOPEZ CONTRERAS",m:"CUFH2",p:49.66,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0},qui:{total:0,con:0,causa:null,causaCount:0}}
+  {r:"15445679-1",n:"IVAN ALEJANDRO CALDERON MUNOZ",m:"BUCLE",p:65.05,inf:{total:55,con:1,avgDias:9,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1,folios:["1310723237@02/07/26"]},rei:{total:62,con:3,avgDias:5.3,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038905173@01/07/26","INC000038901253@30/06/26","INC000038952350@22/07/26"]},qui:{total:38,con:0,causa:null,causaCount:0}},
+  {r:"15957153-k",n:"CRISTIAN ANDRES VASQUEZ MUNOZ",m:"CUFH2",p:110.82,inf:{total:101,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:41,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:49,con:0,causa:null,causaCount:0}},
+  {r:"26758689-6",n:"DANIEL ALEXANDER RAMIREZ TORRES",m:"CUFH2",p:76.86,inf:{total:75,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:40,con:3,avgDias:11.3,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038951546@21/07/26","INC000038926334@11/07/26","INC000038921960@09/07/26"]},qui:{total:62,con:2,causa:"F14_SIN POTENCIA - FIBRA CORTADA RAISE CORTADO - PROTECTO NUEVO",causaCount:1}},
+  {r:"10466681-7",n:"WILFRED RENE ROCCO ZUNIGA",m:"CUFH2",p:76.93,inf:{total:44,con:2,avgDias:15.5,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1,folios:["1317488961@13/07/26","1323353933@24/07/26"]},rei:{total:43,con:4,avgDias:3.3,causa:"BA-PROBLEMA CONEXION",causaCount:2,folios:["INC000038918514@08/07/26","INC000038925286@10/07/26","INC000038921322@09/07/26","INC000038960647@24/07/26"]},qui:{total:57,con:2,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
+  {r:"15714377-8",n:"BENJAMIN ALFREDO MIRANDA IRARRAZABAL",m:"CUFH2",p:67.18,inf:{total:41,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:34,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:12,con:0,causa:null,causaCount:0}},
+  {r:"20175491-7",n:"CHRISTOPHER PATRICK LISBOA BARRERA",m:"CUFH2",p:75.57,inf:{total:51,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:51,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:37,con:1,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
+  {r:"17805227-6",n:"ESTEBAN DAVID ORTIZ FIGUEROA",m:"CUFH2",p:98.35,inf:{total:87,con:2,avgDias:16.5,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1,folios:["1314847724@09/07/26","1318175122@14/07/26"]},rei:{total:55,con:1,avgDias:2,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038953220@22/07/26"]},qui:{total:64,con:2,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
+  {r:"17769689-7",n:"SIMON ANDRES SILVA PHILIP",m:"CUFH2",p:65.5,inf:{total:89,con:1,avgDias:15,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1,folios:["1313086340@07/07/26"]},rei:{total:40,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:42,con:1,causa:"F03_PON CAMBIADO PROYECTO NUEVO",causaCount:1}},
+  {r:"18829522-3",n:"JAIR JESUS VALENCIA DIAZ",m:"CUFH2",p:76.83,inf:{total:76,con:2,avgDias:13.5,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -97918",causaCount:1,folios:["1317814089@14/07/26","1315685754@10/07/26"]},rei:{total:44,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:36,con:1,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
+  {r:"12637747-9",n:"HECTOR LEONARDO MUNOZ MIRANDA",m:"CUFH2",p:85.4,inf:{total:83,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:35,con:1,avgDias:3,causa:"BA-PROBLEMA CONEXION",causaCount:1,folios:["INC000038958527@24/07/26"]},qui:{total:52,con:2,causa:"Q99_ZONA DE RIESGO",causaCount:1}},
+  {r:"26266054-0",n:"LUIS ALFONSO VALLEJO GARCIA",m:"CUFH2",p:87.36,inf:{total:51,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:51,con:1,avgDias:26,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038931364@14/07/26"]},qui:{total:59,con:4,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:2}},
+  {r:"16033846-6",n:"ALEJANDRO SEBASTIAN CISTERNAS MARIN",m:"CUFH2",p:82.18,inf:{total:61,con:5,avgDias:18,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:2,folios:["1315078221@09/07/26","1309440055@30/06/26","1323226169@23/07/26","1317501096@13/07/26","1320620486@18/07/26"]},rei:{total:50,con:6,avgDias:15.2,causa:"FO SIN POTENCIA",causaCount:3,folios:["INC000038909851@03/07/26","INC000038912600@05/07/26","INC000038946735@20/07/26","INC000038924945@10/07/26","INC000038933390@14/07/26","INC000038944699@20/07/26"]},qui:{total:47,con:0,causa:null,causaCount:0}},
+  {r:"13426625-2",n:"FERNANDO ALEXIS HOLM MORALES",m:"CUFH2",p:70.96,inf:{total:78,con:4,avgDias:14.3,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2,folios:["1317599335@13/07/26","1311269739@03/07/26","1317444034@13/07/26","1317471154@13/07/26"]},rei:{total:26,con:1,avgDias:1,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038964832@27/07/26"]},qui:{total:43,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
+  {r:"19016218-4",n:"BASTIAN IGNACIO RIOS MADRID",m:"CUFH2",p:59.85,inf:{total:68,con:3,avgDias:12,causa:"BA-NO NAVEGA - FO - 97918",causaCount:2,folios:["1323286242@23/07/26","1319239976@15/07/26","1321757033@20/07/26"]},rei:{total:47,con:3,avgDias:6.3,causa:"FO SIN POTENCIA",causaCount:3,folios:["INC000038909981@03/07/26","INC000038949347@21/07/26","INC000038938546@17/07/26"]},qui:{total:37,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
+  {r:"15660308-2",n:"GONZALO ANDRES TAPIA VASCONCELO",m:"CUFH2",p:84.62,inf:{total:53,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:75,con:2,avgDias:9,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038944336@20/07/26","INC000038963054@26/07/26"]},qui:{total:38,con:1,causa:"F01_SIN POTENCIA - FIBRA CORTADA RAISE CORTADA - PROYECTO ANTIGUO",causaCount:1}},
+  {r:"13428454-4",n:"HENRY MURIEL DIAZ TORRIJO",m:"CUFH2",p:70.1,inf:{total:59,con:3,avgDias:16.7,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:2,folios:["1315592709@10/07/26","1318121118@14/07/26","1313146498@07/07/26"]},rei:{total:44,con:1,avgDias:10,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038926001@11/07/26"]},qui:{total:44,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
+  {r:"12056884-1",n:"ALEJANDRO ENRIQUE LAGOS GONZALEZ",m:"CUFH2",p:123.22,inf:{total:78,con:1,avgDias:2,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1,folios:["1319347689@15/07/26"]},rei:{total:38,con:1,avgDias:3,causa:"BA-PROBLEMA CONEXION",causaCount:1,folios:["INC000038909354@03/07/26"]},qui:{total:43,con:1,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
+  {r:"11620226-3",n:"ABELARDO HIPOLITO VENEGAS HERNANDEZ",m:"CUFH2",p:85.95,inf:{total:70,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:48,con:3,avgDias:4.7,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038937246@16/07/26","INC000038973788@30/07/26","INC000038907478@02/07/26"]},qui:{total:62,con:2,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
+  {r:"15764873-K",n:"FABIAN GONZALO SAAVEDRA VILCHES",m:"CUFH2",p:50.13,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"17476343-7",n:"FRANCISCO ESTEBAN CARMONA CASTRO",m:"CUFH2",p:47.5,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"9998160-1",n:"NESTOR FABIAN PASTEN ALARCON",m:"CUFH2",p:8.2,inf:{total:63,con:2,avgDias:6,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1324391133@25/07/26","1322510406@21/07/26"]},rei:{total:37,con:4,avgDias:14.5,causa:"FO SIN POTENCIA",causaCount:3,folios:["INC000038910706@04/07/26","INC000038940615@18/07/26","INC000038911850@04/07/26","INC000038920361@08/07/26"]},qui:{total:47,con:1,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
+  {r:"16034875-5",n:"JORGE EDUARDO JORQUERA FLORES",m:"CUFH2",p:21.63,inf:{total:101,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:70,con:1,avgDias:21,causa:"BA-PROBLEMA CONEXION",causaCount:1,folios:["INC000038911347@04/07/26"]},qui:{total:21,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
+  {r:"13650694-3",n:"JORGE RENE RAMIREZ DE LA BARRA",m:"CUFH2",p:68.69,inf:{total:61,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:48,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:15,con:0,causa:null,causaCount:0}},
+  {r:"10792174-5",n:"JOSE GERARDO CORNEJO GARRIDO",m:"CUFH2",p:73.21,inf:{total:74,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:39,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:37,con:0,causa:null,causaCount:0}},
+  {r:"9338001-0",n:"JOSE MANUEL SEPULVEDA ROJAS",m:"CUFH2",p:67.43,inf:{total:52,con:1,avgDias:21,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1315653263@10/07/26"]},rei:{total:48,con:5,avgDias:11.2,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038960457@24/07/26","INC000038911556@04/07/26","INC000038949348@21/07/26","INC000038946976@20/07/26","INC000038904087@01/07/26"]},qui:{total:52,con:1,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
+  {r:"26658025-8",n:"JUAN JOSE MARCANO GONZALEZ",m:"CUFH2",p:70.26,inf:{total:58,con:1,avgDias:21,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1,folios:["1312496136@06/07/26"]},rei:{total:36,con:3,avgDias:10.3,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038926780@11/07/26","INC000038942489@18/07/26","INC000038956574@23/07/26"]},qui:{total:42,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
+  {r:"21454208-0",n:"FRANCO JOSUE DIAZ NUNEZ",m:"CUFH2",p:49.31,inf:{total:48,con:5,avgDias:11,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2,folios:["1309065577@30/06/26","1315932558@11/07/26","1324973687@27/07/26","1315463968@10/07/26","1308827314@30/06/26"]},rei:{total:39,con:5,avgDias:14,causa:"FO SIN POTENCIA",causaCount:4,folios:["INC000038913484@06/07/26","INC000038972920@30/07/26","INC000038921852@09/07/26","INC000038908621@03/07/26","INC000038963543@26/07/26"]},qui:{total:41,con:4,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:2}},
+  {r:"19325742-9",n:"JUAN ESTEBAN MARTINEZ LOCK",m:"CUFH2",p:73.09,inf:{total:78,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:41,con:1,avgDias:2,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038921619@09/07/26"]},qui:{total:32,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
+  {r:"17144358-K",n:"JUAN HERIBERTO VARGAS ALARCON",m:"CUFH2",p:81.39,inf:{total:70,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:44,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:28,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
+  {r:"12221336-6",n:"MARCO MANUEL VEGA VEGA",m:"CUFH2",p:65.9,inf:{total:48,con:2,avgDias:7.5,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1,folios:["1323084414@23/07/26","1322091362@20/07/26"]},rei:{total:51,con:1,avgDias:6,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038973086@30/07/26"]},qui:{total:54,con:2,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:1}},
+  {r:"10387787-3",n:"HECTOR FERNANDO QUIROZ TORRES",m:"CUFH2",p:29.9,inf:{total:51,con:1,avgDias:13,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1312832668@07/07/26"]},rei:{total:36,con:2,avgDias:16,causa:"BA-PROBLEMA CONEXION",causaCount:2,folios:["INC000038933959@15/07/26","INC000038922442@09/07/26"]},qui:{total:7,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:2}},
+  {r:"17165085-2",n:"MANUEL DARIO JELDES ARANCIBIA",m:"CUFH2",p:86.53,inf:{total:77,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:33,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:36,con:1,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
+  {r:"14472203-5",n:"JONATHAN RICARDO HENRIQUEZ VENEGAS",m:"CUFH2",p:59.63,inf:{total:57,con:3,avgDias:19,causa:"DESPACHO TEC REQUERIDO MI MOVISTAR - FO - 97918",causaCount:1,folios:["1309273417@30/06/26","1317753714@14/07/26","1315898060@11/07/26"]},rei:{total:37,con:1,avgDias:19,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038962083@25/07/26"]},qui:{total:38,con:0,causa:null,causaCount:0}},
+  {r:"20521993-5",n:"MATIAS RODRIGO MONTECINOS POZO",m:"CUFH2",p:86.73,inf:{total:89,con:1,avgDias:10,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1310999737@02/07/26"]},rei:{total:54,con:1,avgDias:29,causa:"BA-PROBLEMA CONEXION",causaCount:1,folios:["INC000038902091@30/06/26"]},qui:{total:42,con:1,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
+  {r:"18706092-3",n:"MATIAS RUBEN RUBINA BURGOS",m:"CUFH2",p:52.8,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"26972231-2",n:"HECTOR JOSE ORTIZ MARQUEZ",m:"CUFH2",p:71.12,inf:{total:44,con:3,avgDias:2.7,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1,folios:["1322303994@21/07/26","1326304828@29/07/26","1315611483@10/07/26"]},rei:{total:34,con:3,avgDias:12,causa:"BA-PROBLEMA MODEM",causaCount:2,folios:["INC000038931208@14/07/26","INC000038943659@19/07/26","INC000038920727@08/07/26"]},qui:{total:36,con:2,causa:"F04_SOBREMETRAJE_SIN INDORBOX_DIR DUPLICADA_VERTICAL CAMBIADO",causaCount:1}},
+  {r:"18915265-5",n:"OSCAR ANDRES JOFRE LE CERF",m:"CUFH2",p:93.81,inf:{total:86,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:57,con:2,avgDias:24,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038970679@29/07/26","INC000038909669@03/07/26"]},qui:{total:35,con:0,causa:null,causaCount:0}},
+  {r:"25671905-3",n:"PROPHETE GABRIEL",m:"CUFH2",p:71.33,inf:{total:90,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:21,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:39,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
+  {r:"18380853-2",n:"JOSE LUIS MUNOZ RAMOS",m:"BUCLE",p:47.8,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"11826964-0",n:"RICHARDS ANTONIO CRUZ CUEVAS",m:"CUFH2",p:44.03,inf:{total:44,con:3,avgDias:12.7,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:1,folios:["1317298951@13/07/26","1308042239@27/06/26","1317439456@13/07/26"]},rei:{total:46,con:4,avgDias:5.5,causa:"FO SIN POTENCIA",causaCount:4,folios:["INC000038908249@02/07/26","INC000038969929@28/07/26","INC000038952505@22/07/26","INC000038959545@24/07/26"]},qui:{total:38,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:2}},
+  {r:"21597345-K",n:"JOSUE ORELLANA ALARCON",m:"CUFH2",p:46.7,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"12104020-4",n:"YUSSEF ALI SAT PINO",m:"CUFH2",p:67.42,inf:{total:45,con:2,avgDias:15.5,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1326350943@29/07/26","1321909316@20/07/26"]},rei:{total:44,con:1,avgDias:5,causa:"FO SIN POTENCIA",causaCount:1,folios:["INC000038946877@20/07/26"]},qui:{total:34,con:4,causa:"Q55_NUEVO SERVICIO DE BANDA ANCHA NO FACTIBLE EN TERRENO",causaCount:2}},
+  {r:"17160888-0",n:"ALEJANDRO NICOLAS PARA GOMEZ",m:"CUFH2",p:192.83,inf:{total:77,con:5,avgDias:11.2,causa:"BA-MODEM DANADO - FO - 90057",causaCount:2,folios:["1312945879@07/07/26","1326184801@29/07/26","1310365114@01/07/26","1311539436@03/07/26","1313106680@07/07/26"]},rei:{total:50,con:4,avgDias:13.5,causa:"BA-PROBLEMA MODEM",causaCount:2,folios:["INC000038901803@30/06/26","INC000038903399@30/06/26","INC000038903053@30/06/26","INC000038899091@28/06/26"]},qui:{total:46,con:0,causa:null,causaCount:0}},
+  {r:"9424247-9",n:"AUGUSTO ANDRES FUENTES TAPIA",m:"CUFH2",p:47.53,inf:{total:59,con:2,avgDias:9.5,causa:"DESPACHO TEC REQUERIDO BOT WHATSAPP - FO - 97918",causaCount:2,folios:["1311122892@02/07/26","1319440164@15/07/26"]},rei:{total:45,con:2,avgDias:7,causa:"BA-PROBLEMA CONEXION",causaCount:1,folios:["INC000038907517@02/07/26","INC000038960555@24/07/26"]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"21504558-7",n:"CARLOS HERNAN MUNOZ MATUS",m:"CUFH2",p:178.89,inf:{total:73,con:2,avgDias:19,causa:"BA-NO NAVEGA - FO - 97918",causaCount:2,folios:["1326319030@29/07/26","1317875243@14/07/26"]},rei:{total:61,con:3,avgDias:9.7,causa:"BA-PROBLEMA CONEXION",causaCount:2,folios:["INC000038907707@02/07/26","INC000038899015@27/06/26","INC000038940484@18/07/26"]},qui:{total:48,con:6,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:4}},
+  {r:"11400843-5",n:"FRANCISCO ERNESTO GUERRA GOMEZ",m:"CUFH",p:158.66,inf:{total:24,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:54,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:48,con:2,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
+  {r:"16230919-6",n:"HECTOR DAVID AVALOS RUPCICH",m:"CUFH",p:112.22,inf:{total:43,con:1,avgDias:21,causa:"BA-CABLE INT/ ROSETA OPTICA - FO -90057",causaCount:1,folios:["1317783315@14/07/26"]},rei:{total:62,con:3,avgDias:14,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038918424@08/07/26","INC000038917118@07/07/26","INC000038902284@30/06/26"]},qui:{total:35,con:3,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:2}},
+  {r:"16403671-5",n:"MAURICIO RODOLFO ASTORGA HERRERA",m:"CUFH2",p:66.09,inf:{total:45,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:68,con:2,avgDias:6,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038966801@27/07/26","INC000038929722@13/07/26"]},qui:{total:0,con:0,causa:null,causaCount:0}},
+  {r:"17478977-0",n:"PATRICIO CANALES GEVE",m:"CUFH2",p:187.13,inf:{total:56,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:50,con:7,avgDias:24.3,causa:"FO SIN POTENCIA",causaCount:4,folios:["INC000038960429@24/07/26","INC000038961362@25/07/26","INC000038914660@06/07/26","INC000038914784@06/07/26","INC000038968869@28/07/26","INC000038901796@30/06/26","INC000038914811@06/07/26"]},qui:{total:51,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
+  {r:"17473940-4",n:"PATRICIO EDUARDO DELANO SCHWAIGER",m:"CUFH2",p:131.91,inf:{total:107,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:62,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:8,con:0,causa:null,causaCount:0}},
+  {r:"16523139-2",n:"PEDRO ISAIAS CONCHA JORQUERA",m:"CUFH2",p:149.08,inf:{total:62,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:38,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:41,con:0,causa:null,causaCount:0}},
+  {r:"13637135-5",n:"SANTIAGO EMILIO ANGEL ARIAS",m:"CUFH2",p:108.19,inf:{total:87,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:46,con:3,avgDias:16.7,causa:"FO SIN POTENCIA",causaCount:2,folios:["INC000038950850@21/07/26","INC000038899053@27/06/26","INC000038943208@19/07/26"]},qui:{total:15,con:2,causa:"Q40_SIN RED DE TELEFONICA SOLO COMPETENCIA",causaCount:1}},
+  {r:"19469218-8",n:"MATIAS HERNAN VILLALOBOS RAMOS",m:"CUFH2",p:198.9,inf:{total:28,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:20,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:39,con:0,causa:null,causaCount:0}},
+  {r:"19772487-0",n:"CRISTIAN NICOLAS SERRANO VELLAGAS",m:"CUFH2",p:163.24,inf:{total:60,con:3,avgDias:4,causa:"BA-NO NAVEGA - FO - 97918",causaCount:1,folios:["1325385987@27/07/26","1308628821@29/06/26","1317084746@13/07/26"]},rei:{total:88,con:12,avgDias:8,causa:"FO SIN POTENCIA",causaCount:10,folios:["INC000038941930@18/07/26","INC000038949421@21/07/26","INC000038937490@17/07/26","INC000038936689@16/07/26","INC000038919920@08/07/26","INC000038952979@22/07/26","INC000038946383@20/07/26","INC000038929981@13/07/26","INC000038911271@04/07/26","INC000038938672@17/07/26","INC000038960220@24/07/26","INC000038944610@20/07/26"]},qui:{total:25,con:1,causa:"Q66_INMUEBLE NO CUMPLE CONDICIONES FISICAS PARA INSTALAR",causaCount:1}},
+  {r:"18741232-3",n:"SEBASTIAN ANDRES SANCHEZ CAYUQUEO",m:"CUFH2",p:198.9,inf:{total:102,con:1,avgDias:6,causa:"BA-MODEM DANADO - FO - 90057",causaCount:1,folios:["1323005315@22/07/26"]},rei:{total:35,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:47,con:1,causa:"Q09_DUCTOS TAPADOS Y NO PERMITEN INSTALACION A LA VISTA",causaCount:1}},
+  {r:"13358326-2",n:"EDISON ANTONIO LOPEZ CONTRERAS",m:"CUFH2",p:49.66,inf:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},rei:{total:0,con:0,avgDias:null,causa:null,causaCount:0,folios:[]},qui:{total:0,con:0,causa:null,causaCount:0}}
 ];
 
 // Mínimo de producción exigido por modelo de contrato (hoja "Metas" del archivo fuente)
@@ -439,6 +463,43 @@ function fillAveria(prefix, stat, meta) {
   if (diasEl) diasEl.textContent = stat.avgDias === null || stat.avgDias === undefined ? '—' : stat.avgDias;
 }
 
+function fillFolios(prefix, folios) {
+  const btn = document.getElementById('folios' + prefix + 'Btn');
+  const list = document.getElementById('folios' + prefix + 'List');
+  if (!btn || !list) return;
+  folios = folios || [];
+
+  document.getElementById('folios' + prefix + 'Count').textContent = folios.length;
+  list.innerHTML = '';
+  folios.forEach((f) => {
+    const [num, fecha] = f.split('@');
+    const li = document.createElement('li');
+    const numSpan = document.createElement('span');
+    numSpan.className = 'folio-num';
+    numSpan.textContent = num;
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'folio-date';
+    dateSpan.textContent = fecha || '';
+    li.appendChild(numSpan);
+    li.appendChild(dateSpan);
+    list.appendChild(li);
+  });
+
+  btn.classList.toggle('hidden', folios.length === 0);
+  list.classList.add('hidden');
+  btn.setAttribute('aria-expanded', 'false');
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.folios-btn');
+  if (!btn) return;
+  const list = document.getElementById(btn.id.replace('Btn', 'List'));
+  if (!list) return;
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  list.classList.toggle('hidden', expanded);
+});
+
 function showDashboard(tec) {
   document.getElementById('loginCard').classList.add('hidden');
   document.getElementById('pickList').classList.add('hidden');
@@ -461,9 +522,11 @@ function showDashboard(tec) {
 
   fillAveria('Infancia', tec.inf, METAS_AVERIAS.inf);
   fillCausa('causaInfancia', tec.inf);
+  fillFolios('Infancia', tec.inf.folios);
 
   fillAveria('Reiteradas', tec.rei, METAS_AVERIAS.rei);
   fillCausa('causaReiteradas', tec.rei);
+  fillFolios('Reiteradas', tec.rei.folios);
 
   fillAveria('Quiebres', tec.qui, METAS_AVERIAS.qui);
   fillCausa('causaQuiebres', tec.qui);
