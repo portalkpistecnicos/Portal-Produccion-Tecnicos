@@ -77,6 +77,32 @@
   .status-chip.online { color: var(--good); border-color: var(--good-bg); background: var(--good-bg); }
   .status-chip.offline { color: var(--critical); border-color: var(--critical-bg); background: var(--critical-bg); }
 
+  .topbar-actions { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem;
+    min-height: 0; padding: 0; border-radius: 999px; background: var(--surface-raised);
+    border: 1px solid var(--border); color: var(--text-muted); font-size: 1rem; line-height: 1;
+  }
+  .theme-toggle:hover { background: var(--surface); color: var(--accent); }
+  .theme-icon { display: none; }
+  :root:not([data-theme="dark"]) .theme-icon-sun { display: block; }
+  :root[data-theme="dark"] .theme-icon-moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .theme-icon-sun { display: none; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .theme-icon-moon { display: block; }
+  }
+
+  .dash-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .dash-actions .ghost-btn { padding: 0.55rem 0.9rem; font-size: 0.85rem; min-height: 38px; }
+
+  @media print {
+    body { background: #ffffff !important; }
+    .topbar-actions, .dash-actions, .folios-btn, #loginCard, .status-chip { display: none !important; }
+    .panel { box-shadow: none !important; border: 1px solid #d7e0ec !important; }
+    .folios-list.hidden { display: flex !important; }
+    .folios-list { max-height: none !important; overflow: visible !important; }
+  }
+
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; box-shadow: var(--shadow); }
   @media (min-width: 640px) { .panel { padding: 1.75rem; } }
 
@@ -186,7 +212,13 @@
         <span class="brand-sub">Producción · Avería de Infancia · Repetida Reparada · Quiebres</span>
       </div>
     </div>
-    <span id="status" class="status-chip">Comprobando conexión…</span>
+    <div class="topbar-actions">
+      <span id="status" class="status-chip">Comprobando conexión…</span>
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+        <span class="theme-icon theme-icon-sun">☀</span>
+        <span class="theme-icon theme-icon-moon">☾</span>
+      </button>
+    </div>
   </header>
 
   <section class="panel login-panel" id="loginCard">
@@ -212,7 +244,11 @@
         <p class="rut-line" id="dashRut">—</p>
         <span class="model-pill" id="dashModelo">—</span>
       </div>
-      <button id="logoutBtn" class="ghost-btn">Cerrar sesión</button>
+      <div class="dash-actions">
+        <button type="button" id="exportPdfBtn" class="ghost-btn">Exportar PDF</button>
+        <button type="button" id="exportExcelBtn" class="ghost-btn">Exportar Excel</button>
+        <button id="logoutBtn" class="ghost-btn">Cerrar sesión</button>
+      </div>
     </div>
 
     <p class="eyebrow section-eyebrow">Producción</p>
@@ -324,7 +360,7 @@
   </section>
 
   <footer class="foot-note">
-    <span>Fuente: Producción Sept-2026 (Modelo CUFH2) · <span id="tecCount"></span> · Última actualización: 11-09-2026</span>
+    <span>Fuente: Producción Sept-2026 (Modelo CUFH2) · <span id="tecCount"></span> · Última actualización: 11-09-2026 15:10</span>
     <span>Diseñado por Xas</span>
   </footer>
 </div>
@@ -344,6 +380,30 @@ function updateOnlineStatus() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// --- Tema claro/oscuro (manual, persiste en localStorage; por defecto sigue al sistema) ---
+const themeToggleBtn = document.getElementById('themeToggle');
+function applyTheme(theme) {
+  if (theme === 'light' || theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', theme);
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+function getSystemTheme() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem('portal_theme'); } catch (err) {}
+  applyTheme(saved);
+})();
+themeToggleBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || getSystemTheme();
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('portal_theme', next); } catch (err) {}
+});
 
 // --- Datos de técnicos: Rut, Nombre, Modelo, Producción (pts), AI, RR, Quiebre (fracción) ---
 // Extraído de "Base" y "Excepcion" del archivo Calculo Bono de Producción_Ago-2026_Modelo CUFH2.xlsx
@@ -504,7 +564,10 @@ document.addEventListener('click', (e) => {
   list.classList.toggle('hidden', expanded);
 });
 
+let currentTec = null;
+
 function showDashboard(tec) {
+  currentTec = tec;
   document.getElementById('loginCard').classList.add('hidden');
   document.getElementById('pickList').classList.add('hidden');
   const dash = document.getElementById('dashboard');
@@ -571,9 +634,60 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
   try { sessionStorage.removeItem('tecnico_rut'); } catch (err) {}
+  currentTec = null;
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loginCard').classList.remove('hidden');
   document.getElementById('rutInput').value = '';
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', () => window.print());
+
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
+  if (!currentTec) return;
+  const tec = currentTec;
+  const meta = METAS_MODELO[tec.m] || METAS_MODELO.CUFH2;
+  const rows = [];
+  rows.push(['Portal Producción Técnicos']);
+  rows.push(['Técnico', tec.n]);
+  rows.push(['Código', rutLoginCode(tec.r)]);
+  rows.push(['Modelo', tec.m]);
+  rows.push([]);
+  rows.push(['PRODUCCIÓN']);
+  rows.push(['Puntos de producción', tec.p]);
+  rows.push(['Mínimo exigido (PB)', meta.prodMin]);
+  rows.push(['Estado', tec.p >= meta.prodMin ? 'Cumple' : 'Bajo mínimo']);
+  rows.push([]);
+
+  function addSeccion(nombre, stat, metaPct) {
+    const pct = stat.total ? (stat.con / stat.total * 100).toFixed(1) : '0.0';
+    rows.push([nombre]);
+    rows.push(['Órdenes/Instalaciones asignadas', stat.total]);
+    rows.push(['Con avería/quiebre', stat.con]);
+    rows.push(['Tasa %', pct]);
+    rows.push(['Meta %', metaPct]);
+    if (stat.avgDias !== undefined) rows.push(['Prom. días a la avería', stat.avgDias === null || stat.avgDias === undefined ? '-' : stat.avgDias]);
+    rows.push(['Causa más recurrente', stat.causa || 'Sin registros']);
+    (stat.folios || []).forEach((f, i) => {
+      const [num, fecha] = f.split('@');
+      rows.push(['Actividad ' + (i + 1), num, fecha || '']);
+    });
+    rows.push([]);
+  }
+
+  addSeccion('AVERÍA DE INFANCIA', tec.inf, METAS_AVERIAS.inf);
+  addSeccion('REPETIDA REPARADA', tec.rei, METAS_AVERIAS.rei);
+  addSeccion('QUIEBRES TÉCNICOS', tec.qui, METAS_AVERIAS.qui);
+
+  const csv = rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Produccion_' + tec.n.replace(/\s+/g, '_') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
 // Restaurar sesión si ya había iniciado sesión (sessionStorage sobrevive recargas)
