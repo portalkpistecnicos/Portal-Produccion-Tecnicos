@@ -77,7 +77,12 @@
   .status-chip.online { color: var(--good); border-color: var(--good-bg); background: var(--good-bg); }
   .status-chip.offline { color: var(--critical); border-color: var(--critical-bg); background: var(--critical-bg); }
 
-  .topbar-actions { display: flex; align-items: center; gap: 0.6rem; }
+  .topbar-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+  .topbar-row { display: flex; align-items: center; gap: 0.6rem; }
+  .update-stamp {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.68rem; color: var(--text-muted);
+    white-space: nowrap;
+  }
   .theme-toggle {
     display: flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem;
     min-height: 0; padding: 0; border-radius: 999px; background: var(--surface-raised);
@@ -213,11 +218,14 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <span id="status" class="status-chip">Comprobando conexión…</span>
-      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
-        <span class="theme-icon theme-icon-sun">☀</span>
-        <span class="theme-icon theme-icon-moon">☾</span>
-      </button>
+      <span class="update-stamp">Actualizado: 11-09-2026 15:10</span>
+      <div class="topbar-row">
+        <span id="status" class="status-chip">Comprobando conexión…</span>
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+          <span class="theme-icon theme-icon-sun">☀</span>
+          <span class="theme-icon theme-icon-moon">☾</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -360,7 +368,7 @@
   </section>
 
   <footer class="foot-note">
-    <span>Fuente: Producción Sept-2026 (Modelo CUFH2) · <span id="tecCount"></span> · Última actualización: 11-09-2026 15:10</span>
+    <span>Fuente: Producción Sept-2026 (Modelo CUFH2) · <span id="tecCount"></span></span>
     <span>Diseñado por Xas</span>
   </footer>
 </div>
