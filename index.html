@@ -228,7 +228,7 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <span class="update-stamp">Actualizado: 24-09-2026 13:02</span>
+      <span class="update-stamp">Actualizado: 24-09-2026 13:24</span>
       <div class="topbar-row">
         <span id="status" class="status-chip">Comprobando conexión…</span>
         <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
@@ -703,13 +703,29 @@ function tecnicosDelPeriodo(key) {
   return (PERIODOS_HISTORICO[idx] && PERIODOS_HISTORICO[idx].tecnicos) || [];
 }
 
+function parseFechaDDMMYYYY(f) {
+  const p = f.split('-').map(Number);
+  return new Date(p[2], p[1] - 1, p[0]);
+}
+
+function periodoActivo() {
+  const sel = document.getElementById('periodoSelect');
+  const key = sel ? sel.value : 'actual';
+  if (!key || key === 'actual') return PERIODO_ACTUAL;
+  const idx = parseInt(key.replace('hist', ''), 10);
+  return PERIODOS_HISTORICO[idx] || PERIODO_ACTUAL;
+}
+
 function fillHistoricoDiario(rut) {
   const rutU = (rut || '').toUpperCase();
-  const filas = HISTORICO_DIARIO.filter((h) => h.r === rutU).sort((a, b) => {
-    const pa = a.f.split('-').map(Number);
-    const pb = b.f.split('-').map(Number);
-    return new Date(pa[2], pa[1] - 1, pa[0]) - new Date(pb[2], pb[1] - 1, pb[0]);
-  });
+  const periodo = periodoActivo();
+  const desde = parseFechaDDMMYYYY(periodo.periodoDesde);
+  const hasta = parseFechaDDMMYYYY(periodo.periodoHasta);
+  const filas = HISTORICO_DIARIO.filter((h) => {
+    if (h.r !== rutU) return false;
+    const d = parseFechaDDMMYYYY(h.f);
+    return d >= desde && d <= hasta;
+  }).sort((a, b) => parseFechaDDMMYYYY(a.f) - parseFechaDDMMYYYY(b.f));
   const btn = document.getElementById('historicoBtn');
   const body = document.getElementById('historicoTableBody');
   document.getElementById('historicoCount').textContent = filas.length;
