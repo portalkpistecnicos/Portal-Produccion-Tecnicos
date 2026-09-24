@@ -232,7 +232,7 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <span class="update-stamp">Actualizado: 24-09-2026 14:02</span>
+      <span class="update-stamp">Actualizado: 24-09-2026 14:14</span>
       <div class="topbar-row">
         <span id="status" class="status-chip">Comprobando conexión…</span>
         <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
@@ -737,28 +737,52 @@ function fillHistoricoDiario(tec) {
     const th = document.createElement('th'); th.textContent = f.slice(0, 5);
     trHead.appendChild(th);
   });
-  const thTotal = document.createElement('th'); thTotal.textContent = 'Total';
+  const thTotal = document.createElement('th'); thTotal.textContent = 'Total/Prom.';
   trHead.appendChild(thTotal);
   thead.appendChild(trHead);
 
   body.innerHTML = '';
-  const tr = document.createElement('tr');
-  const tdLabel = document.createElement('td'); tdLabel.textContent = 'Puntos';
-  tr.appendChild(tdLabel);
-  fechas.forEach((f, i) => {
+
+  function addFila(label, valorDia, textoTotal) {
+    const trFila = document.createElement('tr');
+    const tdLabel = document.createElement('td'); tdLabel.textContent = label;
+    trFila.appendChild(tdLabel);
+    fechas.forEach((f, i) => {
+      const v = valorDia(i);
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '—' : v;
+      trFila.appendChild(td);
+    });
+    const tdTotal = document.createElement('td');
+    tdTotal.className = 'historico-total-cell';
+    tdTotal.textContent = textoTotal;
+    trFila.appendChild(tdTotal);
+    body.appendChild(trFila);
+  }
+
+  // Puntos: unico dato con desglose real dia a dia. El Total usa tec.p (el mismo oficial mostrado
+  // en "Puntos de producción" arriba), no la suma de las celdas: la fuente de los dias individuales
+  // es un motor de calculo distinto al oficial y puede diferir levemente (gap conocido, no es un
+  // error de suma).
+  addFila('Puntos', (i) => {
     const v = valores[i];
-    const td = document.createElement('td');
-    td.textContent = (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
-    tr.appendChild(td);
-  });
-  // Se usa tec.p (el mismo total oficial mostrado en "Puntos de producción" arriba), no la suma de
-  // los dias de esta tabla: la fuente de los dias individuales es un motor de calculo distinto al
-  // oficial y puede diferir levemente (gap conocido, no es un error de suma).
-  const tdTotal = document.createElement('td');
-  tdTotal.className = 'historico-total-cell';
-  tdTotal.textContent = tec.p.toFixed(2).replace('.', ',');
-  tr.appendChild(tdTotal);
-  body.appendChild(tr);
+    return (v === null || v === undefined) ? null : v.toFixed(2).replace('.', ',');
+  }, tec.p.toFixed(2).replace('.', ','));
+
+  // AI %, RR % y Quiebre %: son porcentajes acumulados del período completo (no hay dato real por
+  // dia), asi que las celdas diarias quedan en blanco y solo se muestra el promedio/acumulado final.
+  const aiPct = tec.inf.total ? (tec.inf.con / tec.inf.total * 100) : 0;
+  addFila('AI %', () => null, aiPct.toFixed(1).replace('.', ',') + '%');
+
+  const rrPct = tec.rei.total ? (tec.rei.con / tec.rei.total * 100) : 0;
+  addFila('RR %', () => null, rrPct.toFixed(1).replace('.', ',') + '%');
+
+  if (tec.qui.pendiente) {
+    addFila('Quiebre %', () => null, 'Pendiente');
+  } else {
+    const quiPct = tec.qui.total ? (tec.qui.con / tec.qui.total * 100) : 0;
+    addFila('Quiebre %', () => null, quiPct.toFixed(1).replace('.', ',') + '%');
+  }
 
   btn.classList.toggle('hidden', fechas.length === 0);
   document.getElementById('historicoList').classList.add('hidden');
